@@ -74,15 +74,13 @@ function KeyRow({ k, revoking, onRevoke }: { k: PartnerKey; revoking: string | n
           )}
         </div>
 
-        {isActive && (
-          <button
-            onClick={() => onRevoke(k.id)}
-            disabled={revoking === k.id}
-            className="flex-shrink-0 text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 transition-colors px-3 py-1.5 rounded-lg mt-0.5"
-          >
-            {revoking === k.id ? '刪除中…' : '刪除'}
-          </button>
-        )}
+        <button
+          onClick={() => onRevoke(k.id)}
+          disabled={revoking === k.id}
+          className="flex-shrink-0 text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 transition-colors px-3 py-1.5 rounded-lg mt-0.5"
+        >
+          {revoking === k.id ? '刪除中…' : '刪除'}
+        </button>
       </div>
     </div>
   );
