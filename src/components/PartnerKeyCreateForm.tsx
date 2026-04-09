@@ -88,19 +88,19 @@ export default function PartnerKeyCreateForm({ onCreate, onCreated, onError }: P
       </div>
 
       {newKey && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
-          <p className="text-xs text-amber-400 font-medium mb-1">
-            ⚠️ API Key 只顯示一次，請立即複製並妥善保存
+        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+          <p className="text-xs text-green-400 font-medium mb-1">
+            ✓ API Key 已建立
           </p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs text-amber-300 font-mono break-all bg-zinc-900 rounded px-2 py-1">
+            <code className="flex-1 text-xs text-green-300 font-mono break-all bg-zinc-900 rounded px-2 py-1">
               {newKey.api_key}
             </code>
-            <button onClick={handleCopy} className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors px-2 py-1 border border-amber-500/30 rounded">
+            <button onClick={handleCopy} className="text-xs text-green-400/70 hover:text-green-400 transition-colors px-2 py-1 border border-green-500/30 rounded">
               {copied ? '已複製 ✓' : '複製'}
             </button>
           </div>
-          <p className="text-xs text-amber-400/50 mt-1">Partner ID: {newKey.partner_id} · namespace: {newKey.org_namespace}</p>
+          <p className="text-xs text-green-400/50 mt-1">Partner ID: {newKey.partner_id} · namespace: {newKey.org_namespace}</p>
         </div>
       )}
     </div>

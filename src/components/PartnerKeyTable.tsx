@@ -1,11 +1,14 @@
-// PartnerKeyTable — API Key 列表與廢止操作（admin app）
+// PartnerKeyTable — API Key 列表（admin app）
+
+import { useState } from 'react';
 
 interface PartnerKey {
   id: string;
   name: string;
   org_namespace: string;
-  status: 'active' | 'revoked';
+  status: string;
   created_at: string;
+  api_key?: string;
 }
 
 interface Props {
@@ -17,43 +20,69 @@ interface Props {
 }
 
 function KeyRow({ k, revoking, onRevoke }: { k: PartnerKey; revoking: string | null; onRevoke: (id: string) => void }) {
+  const [revealed, setRevealed] = useState(false);
+  const [copied, setCopied] = useState(false);
   const isActive = k.status === 'active';
+
+  const handleCopy = () => {
+    if (!k.api_key) return;
+    void navigator.clipboard.writeText(k.api_key);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="px-4 py-3">
-      <div className="flex items-center gap-3">
-        {/* 狀態指示燈 */}
-        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-zinc-600'}`} />
+      <div className="flex items-start gap-3">
+        <div className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-zinc-600'}`} />
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-zinc-200 truncate">{k.name}</p>
-          <p className="text-xs text-zinc-500 font-mono mt-0.5">{k.id}</p>
-          <p className="text-xs text-zinc-600 mt-0.5">namespace: {k.org_namespace}</p>
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-zinc-200">{k.name}</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+              isActive ? 'bg-green-500/15 text-green-400' : 'bg-zinc-700 text-zinc-500'
+            }`}>
+              {isActive ? '使用中' : k.status}
+            </span>
+          </div>
+          <p className="text-xs text-zinc-500 font-mono">{k.id}</p>
+          <p className="text-xs text-zinc-600">namespace: {k.org_namespace}</p>
           {k.created_at && (
-            <p className="text-xs text-zinc-600 mt-0.5">
-              {new Date(k.created_at).toLocaleString('zh-TW')}
-            </p>
+            <p className="text-xs text-zinc-600">{new Date(k.created_at).toLocaleString('zh-TW')}</p>
+          )}
+          {/* API Key 顯示區 */}
+          {k.api_key ? (
+            <div className="flex items-center gap-2 mt-1">
+              <code className="text-xs text-zinc-400 font-mono bg-zinc-800 rounded px-2 py-1 flex-1 min-w-0 truncate">
+                {revealed ? k.api_key : k.api_key.slice(0, 12) + '••••••••••••••••••••'}
+              </code>
+              <button
+                onClick={() => setRevealed(v => !v)}
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1 flex-shrink-0"
+              >
+                {revealed ? '隱藏' : '顯示'}
+              </button>
+              <button
+                onClick={handleCopy}
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-1 flex-shrink-0"
+              >
+                {copied ? '已複製 ✓' : '複製'}
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-700 mt-1 italic">（舊資料，無法查詢 key）</p>
           )}
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span
-            className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              isActive ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'
-            }`}
+        {isActive && (
+          <button
+            onClick={() => onRevoke(k.id)}
+            disabled={revoking === k.id}
+            className="flex-shrink-0 text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 transition-colors px-3 py-1.5 rounded-lg mt-0.5"
           >
-            {isActive ? '使用中' : '已廢止'}
-          </span>
-          {isActive && (
-            <button
-              onClick={() => onRevoke(k.id)}
-              disabled={revoking === k.id}
-              className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 transition-colors px-3 py-1 rounded-lg"
-            >
-          {revoking === k.id ? '刪除中…' : '刪除'}
-            </button>
-          )}
-        </div>
+            {revoking === k.id ? '刪除中…' : '刪除'}
+          </button>
+        )}
       </div>
     </div>
   );
