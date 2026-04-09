@@ -1,18 +1,29 @@
-// PartnerKeys — Partner Key 管理（admin app）
-// 透過 /api/matchgpt/* proxy，由 Pages Function 持 admin token，不需額外登入
+// PartnerKeys — Partner API Key 管理（admin app）
+// 透過 /api/kbdb proxy，呼叫 KBDB admin/partners 端點
 
 import { useState, useEffect } from 'react';
 import PartnerKeyCreateForm from './PartnerKeyCreateForm';
 import PartnerKeyTable from './PartnerKeyTable';
 
-// --- 型別 ---
-export interface PartnerKey { triplet_id: string; org_id: string; key: string; key_prefix: string; status: 'active' | 'revoked'; created_at: string | null; }
-export interface PartnerKeyCreated { triplet_id: string; org_id: string; key: string; key_prefix: string; status: string; created_at: string; }
+// --- 型別（對應 KBDB partner record）---
+export interface PartnerKey {
+  id: string;           // e.g. "partner-acme"
+  name: string;
+  org_namespace: string;
+  status: 'active' | 'revoked';
+  created_at: string;
+}
+
+export interface PartnerKeyCreated {
+  partner_id: string;
+  org_namespace: string;
+  api_key: string;      // 一次性，只在建立時回傳
+}
 
 // --- API helpers ---
 
-async function mgFetch<T>(path: string, opts?: RequestInit): Promise<T> {
-  const res = await fetch(`/api/matchgpt${path}`, {
+async function kbdbFetch<T>(path: string, opts?: RequestInit): Promise<T> {
+  const res = await fetch(`/api/kbdb${path}`, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...opts?.headers },
   });
@@ -35,8 +46,9 @@ export default function PartnerKeys() {
     setLoading(true);
     setError('');
     try {
-      const data = await mgFetch<{ keys: PartnerKey[] }>('/admin/partner-keys');
-      setKeys(data.keys ?? []);
+      // KBDB GET /admin/partners 回傳陣列
+      const data = await kbdbFetch<PartnerKey[]>('/admin/partners');
+      setKeys(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : '載入失敗');
     } finally {
@@ -46,18 +58,18 @@ export default function PartnerKeys() {
 
   useEffect(() => { void load(); }, []);
 
-  const handleCreate = async (orgId: string): Promise<PartnerKeyCreated> => {
-    return mgFetch<PartnerKeyCreated>('/admin/partner-keys', {
+  const handleCreate = async (name: string, orgNamespace: string, expiresDays?: number): Promise<PartnerKeyCreated> => {
+    return kbdbFetch<PartnerKeyCreated>('/admin/partners', {
       method: 'POST',
-      body: JSON.stringify({ org_id: orgId }),
+      body: JSON.stringify({ name, org_namespace: orgNamespace, ...(expiresDays ? { expires_days: expiresDays } : {}) }),
     });
   };
 
-  const handleRevoke = async (id: string, org: string) => {
-    if (!confirm(`確定廢止 ${org} 的 API Key？`)) return;
+  const handleRevoke = async (id: string) => {
+    if (!confirm(`確定廢止 ${id} 的 API Key？`)) return;
     setRevoking(id);
     try {
-      await mgFetch(`/admin/partner-keys/${id}`, { method: 'DELETE' });
+      await kbdbFetch(`/admin/partners/${encodeURIComponent(id)}`, { method: 'DELETE' });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : '廢止失敗');
@@ -83,7 +95,7 @@ export default function PartnerKeys() {
         loading={loading}
         revoking={revoking}
         onRefresh={() => void load()}
-        onRevoke={(id, org) => void handleRevoke(id, org)}
+        onRevoke={(id) => void handleRevoke(id)}
       />
     </div>
   );

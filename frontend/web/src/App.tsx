@@ -7,9 +7,10 @@ import Activities from './components/Activities';
 import Graph from './components/Graph';
 import Knowledge from './components/Knowledge';
 import Members from './components/Members';
+import PartnerKeys from './components/PartnerKeys';
 import LoginPage from './components/LoginPage';
 
-type Page = 'overview' | 'entities' | 'triplets' | 'search' | 'graph' | 'activities' | 'knowledge' | 'members';
+type Page = 'overview' | 'entities' | 'triplets' | 'search' | 'graph' | 'activities' | 'knowledge' | 'members' | 'partner-keys';
 
 interface User {
   lineUserId: string;
@@ -31,8 +32,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'search',      label: 'Search',      icon: '🔍' },
   { id: 'graph',       label: 'Graph',       icon: '🕸️' },
   { id: 'activities',  label: 'Activities',  icon: '🎯' },
-  { id: 'members',     label: 'Members',     icon: '👥' },
+  { id: 'members',      label: 'Members',      icon: '👥' },
   { id: 'knowledge',   label: 'Knowledge',   icon: '📚' },
+  { id: 'partner-keys', label: 'Partner Keys', icon: '🔑' },
 ];
 
 export default function App() {
@@ -201,6 +203,7 @@ export default function App() {
           {page === 'activities' && <Activities />}
           {page === 'members'    && <Members />}
           {page === 'knowledge'  && <Knowledge />}
+          {page === 'partner-keys' && <PartnerKeys />}
         </main>
       </div>
     </div>
