@@ -19,7 +19,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const upstream = new Request(targetUrl, {
     method: request.method,
     headers: {
-      'Authorization': `Bearer ${env.API_KEY ||  + fallbackToken + }`,
+      'Authorization': `Bearer ${env.API_KEY ?? ''}`,
       'Content-Type': request.headers.get('Content-Type') ?? 'application/json',
     },
     body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
