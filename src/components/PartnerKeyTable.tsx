@@ -50,7 +50,7 @@ function KeyRow({ k, revoking, onRevoke }: { k: PartnerKey; revoking: string | n
               disabled={revoking === k.id}
               className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 disabled:opacity-40 transition-colors px-3 py-1 rounded-lg"
             >
-              {revoking === k.id ? '廢止中…' : '廢止'}
+          {revoking === k.id ? '刪除中…' : '刪除'}
             </button>
           )}
         </div>
